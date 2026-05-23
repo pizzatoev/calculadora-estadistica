@@ -1,0 +1,18 @@
+# Python (backend)
+backend/venv/
+backend/.venv/
+backend/.nltk_data/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Node (frontend)
+calculadora-estadistica/node_modules/
+calculadora-estadistica/dist/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.local

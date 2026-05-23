@@ -1,0 +1,124 @@
+@import 'katex/dist/katex.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --text: #111827;
+  --text-h: #111827;
+  --bg: #f4f3f3;
+  --border: #e5e7eb;
+  --code-bg: #f4f3f3;
+  --accent: #576a8f;
+  --accent-bg: rgba(87, 106, 143, 0.1);
+  --accent-border: rgba(87, 106, 143, 0.45);
+  --social-bg: rgba(244, 243, 243, 0.85);
+  --shadow:
+    rgba(0, 0, 0, 0.06) 0 10px 15px -3px, rgba(0, 0, 0, 0.04) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 14px/150% var(--sans);
+  letter-spacing: 0.01em;
+  color-scheme: light dark;
+  color: var(--text);
+  background: linear-gradient(
+    to bottom right,
+    #ffffff 0%,
+    #ffffff 40%,
+    #ffffff 100%
+  );
+  background-attachment: fixed;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 13px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #111827;
+    --border: #374151;
+    --code-bg: #1f2937;
+    --accent: #7d8dad;
+    --accent-bg: rgba(125, 141, 173, 0.15);
+    --accent-border: rgba(125, 141, 173, 0.45);
+    --social-bg: rgba(31, 41, 55, 0.6);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    background: var(--bg);
+    background-attachment: scroll;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 1.75rem;
+  letter-spacing: -0.03em;
+  margin: 1rem 0;
+  line-height: 1.2;
+  @media (max-width: 1024px) {
+    font-size: 1.5rem;
+    margin: 0.75rem 0;
+  }
+}
+h2 {
+  font-size: 1.25rem;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+  @media (max-width: 1024px) {
+    font-size: 1.125rem;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 0.875em;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}

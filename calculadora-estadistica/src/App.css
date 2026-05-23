@@ -1,0 +1,36 @@
+@keyframes dashboard-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-fade-in {
+  animation: dashboard-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.tab-panel-fade {
+  animation: dashboard-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Incrementa el interlineado interno de KaTeX en fórmulas de procedimiento. */
+.procedimiento-formula .katex-display {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.procedimiento-formula .katex {
+  line-height: 1.9;
+}
+
+.procedimiento-formula .katex-html .base {
+  margin-bottom: 0.28em;
+}
+
+.procedimiento-formula .katex-html .base:last-child {
+  margin-bottom: 0;
+}
