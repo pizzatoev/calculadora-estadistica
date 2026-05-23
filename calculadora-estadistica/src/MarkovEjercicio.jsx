@@ -1,30 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { BlockMath } from 'react-katex'
+import CampoSelect from './CampoSelect.jsx'
 import { BadgeValidacionEstocastica } from './CatalogoBayes6.jsx'
 import { formatearPct, formatearProb, listarPalabrasTabla, palabraPorDefecto } from './corpusProbabilidad'
 import { construirRedBayesiana, cadenaMarkovCapasDesdeRed } from './corpusRedBayesiana'
-
-function CampoSelect({ id, label, value, onChange, opciones }) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full max-w-xs rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm shadow-sm focus:border-[#E97F4A] focus:outline-none focus:ring-2 focus:ring-[#E97F4A]/30"
-      >
-        {opciones.map((op) => (
-          <option key={op.value} value={op.value}>
-            {op.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  )
-}
 
 /** Procedimiento vertical como en la pizarra del ingeniero. */
 function ProcedimientoPizarra({ bloques, palabra }) {

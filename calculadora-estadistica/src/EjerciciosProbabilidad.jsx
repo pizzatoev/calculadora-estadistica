@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import CampoSelect from './CampoSelect.jsx'
 import CatalogoBayes6, { ValidacionRamasSuman1 } from './CatalogoBayes6.jsx'
 import { validarArbolDecision } from './corpusRedBayesiana'
 import RedBayesianaPanel from './RedBayesianaPanel.jsx'
@@ -26,28 +27,6 @@ const ETIQUETAS = {
   copilot: 'Copilot',
   deepseek: 'DeepSeek',
   chatgpt: 'ChatGPT',
-}
-
-function CampoSelect({ id, label, value, onChange, opciones }) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-400">
-        {label}
-      </label>
-      <select
-        id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-[#E97F4A] focus:outline-none focus:ring-2 focus:ring-[#E97F4A]/30"
-      >
-        {opciones.map((op) => (
-          <option key={op.value} value={op.value}>
-            {op.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  )
 }
 
 function ValidacionProbabilidades({ titulo, items, todasOk }) {
@@ -631,22 +610,28 @@ export default function ContenidoProbabilidad({ resultado }) {
   const [ejercicio, setEjercicio] = useState('1')
 
   const tabs = [
-    { id: '1', label: 'Ej. 1 — Prob. simple' },
-    { id: '2', label: 'Ej. 2 — Bayes' },
-    { id: '3', label: 'Ej. 3 — Markov' },
+    { id: '1', label: 'Prob. simple' },
+    { id: '2', label: 'Bayes' },
+    { id: '3', label: 'Markov' },
   ]
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-1 rounded-xl bg-neutral-100/95 p-1 ring-1 ring-neutral-100">
+      <div
+        className="flex shrink-0 gap-1 rounded-xl bg-neutral-100/95 p-1 ring-1 ring-neutral-100"
+        role="tablist"
+        aria-label="Ejercicios de probabilidad"
+      >
         {tabs.map((t) => (
           <button
             key={t.id}
             type="button"
+            role="tab"
+            aria-selected={ejercicio === t.id}
             onClick={() => setEjercicio(t.id)}
-            className={`flex-1 rounded-lg px-2 py-2 text-center text-[10px] font-bold uppercase tracking-wide sm:text-[11px] ${
+            className={`flex-1 rounded-lg py-2.5 text-center text-[10px] font-bold uppercase tracking-wider transition-all sm:text-[11px] ${
               ejercicio === t.id
-                ? 'bg-white text-[#E97F4A] shadow-sm'
+                ? 'bg-white text-[#E97F4A] shadow-sm ring-1 ring-neutral-100'
                 : 'text-gray-500 hover:text-[#E97F4A]/80'
             }`}
           >

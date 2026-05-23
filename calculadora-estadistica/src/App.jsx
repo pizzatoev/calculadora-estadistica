@@ -43,6 +43,7 @@ import { BlockMath, InlineMath } from 'react-katex'
 import * as XLSX from 'xlsx'
 import './App.css'
 import AnalisisCorpus from './AnalisisCorpus.jsx'
+import SelectorCombo from './SelectorCombo.jsx'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'
 
@@ -57,174 +58,6 @@ const METODOS_MUESTREO = [
   { value: 'estratos', label: 'Estratificado' },
   { value: 'conglomerados', label: 'Por conglomerados' },
 ]
-
-function SelectorCombo({ id, value, onChange, opciones = [], placeholder = '— Selecciona —' }) {
-  const [abierto, setAbierto] = useState(false)
-  const [menuPos, setMenuPos] = useState({
-    left: 0,
-    width: 0,
-    top: undefined,
-    bottom: undefined,
-    flip: false,
-  })
-  const triggerRef = useRef(null)
-  const menuRef = useRef(null)
-
-  const actualizarPosicion = useCallback(() => {
-    const el = triggerRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
-    const espacioDebajo = window.innerHeight - r.bottom
-    const alturaEstimada = 200
-    const flip = espacioDebajo < alturaEstimada && r.top > alturaEstimada
-    const w = Math.max(r.width, 200)
-    const pad = 8
-    let left = r.left
-    if (left + w > window.innerWidth - pad) {
-      left = Math.max(pad, window.innerWidth - w - pad)
-    }
-    if (flip) {
-      setMenuPos({
-        left,
-        width: w,
-        top: undefined,
-        bottom: window.innerHeight - r.top + 6,
-        flip: true,
-      })
-    } else {
-      setMenuPos({
-        left,
-        width: w,
-        top: r.bottom + 6,
-        bottom: undefined,
-        flip: false,
-      })
-    }
-  }, [])
-
-  useLayoutEffect(() => {
-    if (!abierto) return
-    actualizarPosicion()
-    window.addEventListener('resize', actualizarPosicion)
-    window.addEventListener('scroll', actualizarPosicion, true)
-    return () => {
-      window.removeEventListener('resize', actualizarPosicion)
-      window.removeEventListener('scroll', actualizarPosicion, true)
-    }
-  }, [abierto, actualizarPosicion])
-
-  useEffect(() => {
-    if (!abierto) return
-    function cerrarSiFuera(e) {
-      const t = triggerRef.current
-      const m = menuRef.current
-      if (t?.contains(e.target) || m?.contains(e.target)) return
-      setAbierto(false)
-    }
-    document.addEventListener('mousedown', cerrarSiFuera)
-    return () => document.removeEventListener('mousedown', cerrarSiFuera)
-  }, [abierto])
-
-  useEffect(() => {
-    if (!abierto) return
-    function escape(e) {
-      if (e.key === 'Escape') setAbierto(false)
-    }
-    document.addEventListener('keydown', escape)
-    return () => document.removeEventListener('keydown', escape)
-  }, [abierto])
-
-  const etiquetaActual = opciones.find((op) => op.value === value)?.label ?? placeholder
-
-  const menu = abierto && (
-    <ul
-      ref={menuRef}
-      id={`${id}-lista`}
-      role="listbox"
-      className="fixed z-[100] max-h-[min(16rem,calc(100vh-2rem))] overflow-auto rounded-xl border border-neutral-100/90 bg-white py-1 shadow-xl shadow-neutral-900/15 ring-1 ring-neutral-900/5"
-      style={{
-        left: menuPos.left,
-        width: menuPos.width,
-        ...(menuPos.flip ? { bottom: menuPos.bottom } : { top: menuPos.top }),
-      }}
-    >
-      <li role="presentation">
-        <button
-          type="button"
-          role="option"
-          aria-selected={!value}
-          className={`flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition ${
-            !value
-              ? 'bg-[#FFF6F0] font-semibold text-[#D66B38]'
-              : 'text-gray-600 hover:bg-[#E97F4A]/12 hover:text-[#C55A28]'
-          }`}
-          onClick={() => {
-            onChange('')
-            setAbierto(false)
-          }}
-        >
-          <span className="truncate">{placeholder}</span>
-          {!value ? (
-            <Check className="h-4 w-4 shrink-0 text-[#E97F4A]" strokeWidth={2.5} aria-hidden />
-          ) : null}
-        </button>
-      </li>
-      {opciones.map((op) => {
-        const seleccionado = op.value === value
-        return (
-          <li key={op.value} role="presentation">
-            <button
-              type="button"
-              role="option"
-              aria-selected={seleccionado}
-              className={`flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition ${
-                seleccionado
-                  ? 'bg-[#FFF6F0] font-semibold text-[#D66B38]'
-                  : 'text-gray-600 hover:bg-[#E97F4A]/12 hover:text-[#C55A28]'
-              }`}
-              onClick={() => {
-                onChange(op.value)
-                setAbierto(false)
-              }}
-            >
-              <span className="truncate">{op.label}</span>
-              {seleccionado ? (
-                <Check className="h-4 w-4 shrink-0 text-[#E97F4A]" strokeWidth={2.5} aria-hidden />
-              ) : null}
-            </button>
-          </li>
-        )
-      })}
-    </ul>
-  )
-
-  return (
-    <>
-      <div className="relative">
-        <button
-          ref={triggerRef}
-          type="button"
-          id={id}
-          aria-haspopup="listbox"
-          aria-expanded={abierto}
-          aria-controls={`${id}-lista`}
-          onClick={() => setAbierto((o) => !o)}
-          className="flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-neutral-200 bg-white px-3 text-left text-sm font-medium text-gray-900 shadow-sm transition hover:border-brand-200 hover:bg-brand-50/40 focus:border-brand-400 focus:outline-none focus:ring-4 focus:ring-brand-500/15"
-        >
-          <span className="min-w-0 truncate">{etiquetaActual}</span>
-          <ChevronDown
-            strokeWidth={2}
-            className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
-              abierto ? 'rotate-180 text-brand-500' : ''
-            }`}
-            aria-hidden
-          />
-        </button>
-      </div>
-      {typeof document !== 'undefined' && menu ? createPortal(menu, document.body) : null}
-    </>
-  )
-}
 
 function SelectorMetodoMuestreo({ id, value, onChange }) {
   return (
@@ -2592,36 +2425,44 @@ function App() {
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto bg-transparent text-left font-sans text-gray-900 antialiased max-lg:min-h-svh lg:h-full lg:overflow-hidden">
       <div className="mx-auto flex min-h-0 w-full max-w-[95%] flex-1 flex-col px-4 pb-8 pt-5 sm:px-6 lg:max-h-full lg:px-6 lg:pb-4 lg:pt-4 xl:max-w-[1600px]">
-        <header className="mb-4 shrink-0 space-y-3 border-b border-neutral-200/60 pb-3 lg:mb-3">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[#FFC300]">
-              Panel Analítico
-            </p>
-            <h1 className="!mt-0 !text-xl font-bold tracking-tight text-[#E97F4A] sm:!text-2xl">
-              Calculadora de Estadística
-            </h1>
-          </div>
-          <div
-            className="flex rounded-2xl bg-neutral-100/90 p-1 ring-1 ring-neutral-100"
-            role="tablist"
-            aria-label="Módulos de la aplicación"
-          >
-            {MODULOS_APP.map((mod) => (
-              <button
-                key={mod.id}
-                type="button"
-                role="tab"
-                aria-selected={moduloPrincipal === mod.id}
-                onClick={() => setModuloPrincipal(mod.id)}
-                className={`flex-1 rounded-xl px-3 py-2.5 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E97F4A]/45 sm:text-sm ${
-                  moduloPrincipal === mod.id
-                    ? 'bg-white text-[#E97F4A] shadow-sm ring-1 ring-neutral-100'
-                    : 'text-gray-400 hover:text-[#E97F4A]/85'
-                }`}
-              >
-                {mod.label}
-              </button>
-            ))}
+        <header className="mb-4 shrink-0 border-b border-neutral-200/60 pb-3 lg:mb-3">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-[#FFC300]">
+                Panel Analítico
+              </p>
+              <h1 className="!mt-0 !text-xl font-bold tracking-tight text-[#E97F4A] sm:!text-2xl">
+                Calculadora de Estadística
+              </h1>
+            </div>
+            <nav
+              className="flex shrink-0 flex-wrap items-center gap-x-1 gap-y-1 pb-0.5"
+              role="tablist"
+              aria-label="Módulos de la aplicación"
+            >
+              {MODULOS_APP.map((mod, i) => (
+                <span key={mod.id} className="inline-flex items-center gap-1">
+                  {i > 0 ? (
+                    <span className="select-none px-0.5 text-base font-light text-neutral-300" aria-hidden>
+                      |
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={moduloPrincipal === mod.id}
+                    onClick={() => setModuloPrincipal(mod.id)}
+                    className={`rounded-sm px-1 py-0.5 text-sm font-bold tracking-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E97F4A]/45 sm:text-base ${
+                      moduloPrincipal === mod.id
+                        ? 'text-[#E97F4A] underline decoration-[#E97F4A] decoration-2 underline-offset-[6px]'
+                        : 'text-neutral-400 hover:text-[#E97F4A]/75'
+                    }`}
+                  >
+                    {mod.label}
+                  </button>
+                </span>
+              ))}
+            </nav>
           </div>
         </header>
 
