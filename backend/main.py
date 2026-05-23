@@ -12,8 +12,10 @@ from scipy import stats
 from text_analysis import (
     ARCHIVOS_SERVIDOR,
     FUENTES_CORPUS,
+    METADATOS_FUENTES,
     analizar_corpus,
     cargar_corpus_desde_directorio,
+    leer_contenido_fuente,
     ruta_archivo_fuente,
 )
 
@@ -368,7 +370,22 @@ def listar_archivos_corpus():
                 "bytes": ruta.stat().st_size if existe else 0,
             }
         )
-    return {"directorio": str(CORPUS_DIR), "archivos": archivos}
+    return {
+        "directorio": str(CORPUS_DIR),
+        "archivos": archivos,
+        "metadatos_fuentes": METADATOS_FUENTES,
+    }
+
+
+@app.get("/api/corpus/contenido/{fuente}")
+def obtener_contenido_corpus(fuente: str, max_caracteres: int = 80_000):
+    """Devuelve el texto del .txt de una fuente en el servidor (vista previa)."""
+    if fuente not in FUENTES_CORPUS:
+        raise HTTPException(status_code=404, detail="Fuente no válida.")
+    try:
+        return leer_contenido_fuente(CORPUS_DIR, fuente, max_caracteres=max_caracteres)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @app.post("/api/corpus/analizar")

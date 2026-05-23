@@ -11,6 +11,41 @@ from stopwords_es import obtener_stopwords_es
 FUENTES_CORPUS = ("humano", "copilot", "deepseek", "chatgpt")
 TOP_N = 15
 
+METADATOS_FUENTES = {
+    "humano": {
+        "titulo_obra": "Don Quijote de la Mancha",
+        "autor": "Miguel de Cervantes",
+        "descripcion": (
+            "Texto de referencia (libro humano): fragmento de la novela usado como "
+            "corpus base para comparar con respuestas generadas por IA."
+        ),
+    },
+    "copilot": {
+        "titulo_obra": "Ensayos sobre Don Quijote (tema del proyecto)",
+        "autor": "Microsoft Copilot",
+        "descripcion": (
+            "Texto generado por Copilot a partir de los mismos temas del Quijote; "
+            "sirve para contrastar estilo y vocabulario frente al libro."
+        ),
+    },
+    "deepseek": {
+        "titulo_obra": "Ensayos sobre Don Quijote (tema del proyecto)",
+        "autor": "DeepSeek",
+        "descripcion": (
+            "Texto generado por DeepSeek con enfoque académico sobre la obra; "
+            "complementa la comparación entre fuentes IA."
+        ),
+    },
+    "chatgpt": {
+        "titulo_obra": "Ensayos sobre Don Quijote (tema del proyecto)",
+        "autor": "ChatGPT",
+        "descripcion": (
+            "Texto generado por ChatGPT sobre temas de Don Quijote; "
+            "se analiza junto al corpus humano y las otras IAs."
+        ),
+    },
+}
+
 # Archivos reales en backend/data/corpus
 ARCHIVOS_SERVIDOR: dict[str, str] = {
     "humano": "humano.txt",
@@ -182,12 +217,35 @@ def analizar_corpus(
         "fuentes": resumen_fuentes,
         "palabras_repetidas_top15": repetidas,
         "tabla_contingencia": tabla,
+        "metadatos_fuentes": METADATOS_FUENTES,
         "parametros": {
             "top_n": TOP_N,
             "fuentes": list(FUENTES_CORPUS),
             "stopwords_filtradas": True,
             "total_stopwords": len(obtener_stopwords_es()),
         },
+    }
+
+
+def leer_contenido_fuente(directorio: Path, fuente: str, max_caracteres: int = 80_000) -> dict:
+    """Lee el .txt de una fuente (servidor) con límite opcional de caracteres."""
+    if fuente not in FUENTES_CORPUS:
+        raise ValueError(f"Fuente no válida: {fuente}")
+    contenido, nombre = leer_archivo_fuente(directorio, fuente)
+    if not (contenido or "").strip():
+        raise FileNotFoundError(f"No hay archivo para la fuente {fuente}")
+    total = len(contenido)
+    truncado = total > max_caracteres
+    meta = METADATOS_FUENTES.get(fuente, {})
+    return {
+        "fuente": fuente,
+        "nombre_archivo": nombre,
+        "contenido": contenido[:max_caracteres] if truncado else contenido,
+        "total_caracteres": total,
+        "truncado": truncado,
+        "titulo_obra": meta.get("titulo_obra"),
+        "autor": meta.get("autor"),
+        "descripcion": meta.get("descripcion"),
     }
 
 
