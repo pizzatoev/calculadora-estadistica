@@ -303,12 +303,12 @@ function Ejercicio2Bayes({ resultado }) {
   const pHumano = marg.totalGeneral > 0 ? marg.totalHumano / marg.totalGeneral : 0
 
   const [arbolPalabra, setArbolPalabra] = useState('')
-  const [arbolHerramienta, setArbolHerramienta] = useState(FUENTES_IA[0])
+  const [arbolFuente, setArbolFuente] = useState(ID_HUMANO)
 
   useEffect(() => {
     const defs = palabrasDefectoCatalogo(resultado)
     setArbolPalabra(defs[0] ?? palabraPorDefecto(resultado))
-    setArbolHerramienta('chatgpt')
+    setArbolFuente(ID_HUMANO)
   }, [resultado])
 
   const palabrasLista = listarPalabrasTabla(resultado.tabla_contingencia)
@@ -330,18 +330,18 @@ function Ejercicio2Bayes({ resultado }) {
           opciones={palabrasLista.map((p) => ({ value: p, label: p }))}
         />
         <CampoSelect
-          id="ej2-arbol-herramienta"
-          label="Herramienta IA (árbol)"
-          value={arbolHerramienta}
-          onChange={setArbolHerramienta}
-          opciones={FUENTES_IA.map((id) => ({ value: id, label: ETIQUETAS[id] }))}
+          id="ej2-arbol-fuente"
+          label="Fuente (árbol)"
+          value={arbolFuente}
+          onChange={setArbolFuente}
+          opciones={FUENTES_TABLA.map((id) => ({ value: id, label: ETIQUETAS[id] }))}
         />
       </div>
 
       <ArbolBayesSVG
         resultado={resultado}
         palabra={arbolPalabra}
-        herramientaId={arbolHerramienta}
+        fuenteId={arbolFuente}
         pHumano={pHumano}
         pIA={pIA}
         marg={marg}
@@ -354,7 +354,7 @@ function Ejercicio2Bayes({ resultado }) {
   )
 }
 
-function ArbolBayesSVG({ resultado, palabra, herramientaId, pHumano, pIA, marg }) {
+function ArbolBayesSVG({ resultado, palabra, fuenteId, pHumano, pIA, marg }) {
   const w = 820
   const h = 380
   const boxW = 96
@@ -366,10 +366,10 @@ function ArbolBayesSVG({ resultado, palabra, herramientaId, pHumano, pIA, marg }
   const pDeepIA = pIA > 0 ? marg.porFuente.deepseek / marg.totalIA : 0
   const pGptIA = pIA > 0 ? marg.porFuente.chatgpt / marg.totalIA : 0
 
-  const pPalabraHerramienta = useMemo(() => {
-    const r = probabilidadCondicionalPalabraIA(resultado, palabra, herramientaId)
+  const pPalabraFuente = useMemo(() => {
+    const r = probabilidadCondicionalPalabraIA(resultado, palabra, fuenteId)
     return r.valor
-  }, [resultado, palabra, herramientaId])
+  }, [resultado, palabra, fuenteId])
 
   const coords = {
     raiz: { x: 58, y: h / 2 },
@@ -382,13 +382,19 @@ function ArbolBayesSVG({ resultado, palabra, herramientaId, pHumano, pIA, marg }
     palabra: { x: w - 100, y: h / 2 },
   }
 
-  const rutaActiva = new Set(['raiz', 'l1_ia', herramientaId, 'palabra'])
+  const rutaActiva = useMemo(() => {
+    if (fuenteId === ID_HUMANO) {
+      return new Set(['raiz', 'l1_humano', 'humano_orig', 'palabra'])
+    }
+    return new Set(['raiz', 'l1_ia', fuenteId, 'palabra'])
+  }, [fuenteId])
+
   const enRuta = (id) => rutaActiva.has(id)
 
   const labelPalabra = useMemo(() => {
-    if (pPalabraHerramienta == null) return null
-    return formatearPct(pPalabraHerramienta, 0)
-  }, [pPalabraHerramienta])
+    if (pPalabraFuente == null) return null
+    return formatearPct(pPalabraFuente, 0)
+  }, [pPalabraFuente])
 
   const validacionArbol = useMemo(() => validarArbolDecision(marg), [marg])
 
@@ -507,7 +513,8 @@ function ArbolBayesSVG({ resultado, palabra, herramientaId, pHumano, pIA, marg }
       </p>
       <p className="mb-2 px-2 text-[9px] leading-snug text-gray-500">
         Cada nodo representa una decisión hasta obtener{' '}
-        <strong className="text-[#D66B38]">{palabra || 'la palabra'}</strong>.
+        <strong className="text-[#D66B38]">{palabra || 'la palabra'}</strong>. Elige la fuente en el
+        combobox (Humano o una IA) para resaltar esa rama.
       </p>
       <svg viewBox={`0 0 ${w} ${h}`} className="mx-auto w-full min-w-[680px]" role="img" aria-label="Árbol de Bayes">
         {aristas.map((e) => dibujarArista(e, false))}
